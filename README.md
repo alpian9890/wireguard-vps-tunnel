@@ -59,6 +59,90 @@ Sementara itu SSH ke IP asli VPS Client **tetap bisa** kapan saja — termasuk s
 | **Langsung** | `ssh root@IP_ASLI_VPS_B` | ✅ Selalu — bahkan jika VPS Host mati |
 | **ProxyJump** | `ssh -J root@VPS_HOST root@10.0.0.2` | ✅ Saat VPS Host hidup |
 
+### Cara Login SSH ke VPS Client saat Tunnel Aktif
+
+Saat WireGuard tunnel sedang aktif di VPS Client, Anda **tetap bisa SSH** ke VPS Client.
+Berikut contoh perintah lengkap untuk kedua cara:
+
+#### Cara 1: SSH Langsung ke IP Asli (Recommended)
+
+Cara ini **selalu bisa** — bahkan jika VPS Host sedang mati. Berkat mekanisme CONNMARK,
+reply SSH akan keluar via interface fisik (bukan tunnel), sehingga koneksi tidak putus.
+
+```bash
+# Contoh: Login ke VPS B (IP asli: 198.51.100.20)
+ssh root@198.51.100.20
+
+# Contoh: Login ke VPS C (IP asli: 192.0.2.30)
+ssh root@192.0.2.30
+
+# Dengan port custom (misal SSH di port 2222)
+ssh -p 2222 root@198.51.100.20
+
+# Dengan private key
+ssh -i ~/.ssh/id_rsa root@198.51.100.20
+```
+
+> **Penting:** IP yang digunakan adalah **IP Public asli** VPS Client,
+> bukan IP tunnel (10.0.0.x) dan bukan IP VPS Host.
+
+#### Cara 2: SSH via ProxyJump (melalui VPS Host)
+
+Cara ini menggunakan VPS Host sebagai "lompatan" (jump host). SSH masuk ke VPS Host dulu,
+lalu diteruskan ke VPS Client melalui jaringan tunnel internal (10.0.0.x).
+
+```bash
+# Contoh: Login ke VPS B via VPS Host
+ssh -J root@203.0.113.10 root@10.0.0.2
+#     └── jump host ────┘ └── target ─┘
+
+# Contoh: Login ke VPS C via VPS Host
+ssh -J root@203.0.113.10 root@10.0.0.3
+
+# Jika VPS Host pakai port SSH non-standar (misal 2222)
+ssh -J root@203.0.113.10:2222 root@10.0.0.2
+
+# Dengan password (jika belum setup key)
+ssh -o ProxyCommand="ssh -W %h:%p root@203.0.113.10" root@10.0.0.2
+```
+
+#### Cara 2b: SSH Config (supaya tidak perlu ketik panjang)
+
+Buat file `~/.ssh/config` di **laptop/PC lokal** Anda:
+
+```
+Host vps-host
+    HostName 203.0.113.10
+    User root
+
+Host vps-b
+    HostName 10.0.0.2
+    User root
+    ProxyJump vps-host
+
+Host vps-c
+    HostName 10.0.0.3
+    User root
+    ProxyJump vps-host
+```
+
+Setelah itu cukup ketik:
+
+```bash
+ssh vps-b    # Otomatis lewat VPS Host → ke VPS B
+ssh vps-c    # Otomatis lewat VPS Host → ke VPS C
+```
+
+#### Perbandingan Kedua Cara
+
+| | Cara 1: Langsung | Cara 2: ProxyJump |
+|-|-------------------|-------------------|
+| **Perintah** | `ssh root@IP_ASLI` | `ssh -J root@IP_HOST root@10.0.0.x` |
+| **VPS Host mati** | ✅ Tetap bisa | ❌ Tidak bisa |
+| **IP Client diblokir** | ❌ Tidak bisa | ✅ Bisa (lewat Host) |
+| **Kecepatan** | Langsung, cepat | Sedikit lebih lambat (2 hop) |
+| **Kapan pakai** | Default, sehari-hari | Backup, atau akses private network |
+
 ---
 
 ## Fitur
