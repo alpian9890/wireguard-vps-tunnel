@@ -10,6 +10,9 @@
 # PENTING: CONNMARK dipasang SEBELUM default route diubah,
 # sehingga koneksi SSH yang sedang aktif tidak putus.
 #
+# v4: Retry loop saat boot — default gateway mungkin belum siap
+#     ketika WireGuard dimulai (race condition systemd).
+#
 # Usage: tunnel-up.sh [INTERFACE]
 # Dipanggil oleh wg-quick via PostUp:
 #   PostUp = /etc/wireguard/tunnel-up.sh %i
@@ -30,12 +33,26 @@ ok()   { echo -e "  ${GREEN}✓${NC} $*"; }
 fail() { echo -e "  ${RED}✗${NC} $*" >&2; }
 info() { echo -e "  ${CYAN}→${NC} $*"; }
 
-# ── 1. Deteksi default gateway ───────────────────────────────
-DEF_GW=$(ip -4 route show default | head -1 | awk '{print $3}')
-DEF_IF=$(ip -4 route show default | head -1 | awk '{print $5}')
+# ── 1. Deteksi default gateway (retry untuk boot) ────────────
+#    Saat boot, network-online.target bisa siap sebelum default
+#    route terpasang. Script menunggu sampai 30 detik.
+MAX_RETRY=15
+RETRY_INTERVAL=2
+DEF_GW=""
+DEF_IF=""
+
+for i in $(seq 1 $MAX_RETRY); do
+    DEF_GW=$(ip -4 route show default | head -1 | awk '{print $3}')
+    DEF_IF=$(ip -4 route show default | head -1 | awk '{print $5}')
+    if [[ -n "$DEF_GW" && -n "$DEF_IF" ]]; then
+        break
+    fi
+    info "Menunggu default gateway... (${i}/${MAX_RETRY})"
+    sleep $RETRY_INTERVAL
+done
 
 if [[ -z "$DEF_GW" || -z "$DEF_IF" ]]; then
-    fail "Tidak bisa mendeteksi default gateway!"
+    fail "Tidak bisa mendeteksi default gateway setelah $((MAX_RETRY * RETRY_INTERVAL)) detik!"
     exit 1
 fi
 

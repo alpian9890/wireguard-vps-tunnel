@@ -290,6 +290,51 @@ chmod +x /etc/wireguard/tunnel-down.sh
    # Harus: AllowedIPs = 0.0.0.0/0
    ```
 
+5. **⚠️ Software tunneling lain (tun2socks/Xray/V2Ray) menimpa default route:**
+   ```bash
+   # Cek apakah ada interface tun0 atau proses tunneling lain
+   ip link show tun0 2>/dev/null && echo "BAHAYA: tun0 aktif!"
+   ps aux | grep -E 'tun2socks|xray|v2ray' | grep -v grep
+
+   # Cek default route — jika mengarah ke tun0, ini masalahnya!
+   ip route show default
+   # ❌ Salah: default dev tun0 scope link metric 1
+   # ✅ Benar: default dev wg0 scope link
+   ```
+
+   **Solusi:**
+   ```bash
+   # 1. Matikan proses tunneling lama
+   # Cari PID spesifik lalu kill satu per satu
+   ps aux | grep -E 'tun2socks|xray' | grep -v grep
+   kill <PID_XRAY> <PID_TUN2SOCKS>
+
+   # 2. Hapus interface tun0
+   ip link set tun0 down 2>/dev/null
+   ip link delete tun0 2>/dev/null
+
+   # 3. Nonaktifkan service lama secara permanen
+   systemctl stop vpn-tunnel.service xray.service 2>/dev/null
+   systemctl disable vpn-tunnel.service xray.service 2>/dev/null
+
+   # 4. Bersihkan iptables rules lama yang mungkin tertinggal
+   # Cek mangle table — seharusnya hanya ada CONNMARK rules kita
+   iptables -t mangle -L -n -v --line-numbers
+   # Jika ada rules lama (MARK set 0x64, interface "link", ctstate NEW),
+   # hapus satu per satu:
+   # iptables -t mangle -D <CHAIN> <LINE_NUMBER>
+
+   # 5. Restart WireGuard
+   wg-quick down wg0 && wg-quick up wg0
+   ```
+
+   > **Catatan penting:** Jika Anda sebelumnya menggunakan Xray+tun2socks,
+   > pastikan service-nya di-disable. Jika dibiarkan aktif, saat reboot
+   > service tersebut akan start dan menimpa default route WireGuard.
+   > Selain itu, `systemctl stop vpn-tunnel.service` punya script cleanup
+   > yang bisa **menghapus CONNMARK rules dan routing table WireGuard**,
+   > menyebabkan VPS tidak bisa diakses (harus recovery via VNC).
+
 ---
 
 ### Problem: Tidak ada handshake (tunnel tidak established)
@@ -516,11 +561,30 @@ systemctl restart wg-quick@wg0
 
 ## Masalah setelah Reboot
 
-### Problem: Service gagal start — "network is unreachable"
+### Problem: Service gagal start — "Tidak bisa mendeteksi default gateway"
 
-**Penyebab:** Network belum ready saat systemd menjalankan WireGuard.
+**Gejala:**
+```bash
+journalctl -u wg-quick@wg0 --no-pager | tail -10
+# ✗ Tidak bisa mendeteksi default gateway!
+# wg-quick@wg0.service: Failed with result 'exit-code'.
+```
 
-**Solusi:**
+**Penyebab:** Race condition — network belum ready saat systemd menjalankan
+WireGuard. Default route belum terpasang saat `tunnel-up.sh` mencoba membacanya.
+
+**Solusi 1 (Recommended): Update tunnel-up.sh ke v4 dengan retry loop:**
+
+Script `tunnel-up.sh` v4 sudah memiliki retry loop bawaan yang menunggu
+hingga 30 detik untuk default gateway. Pastikan script terbaru ter-deploy:
+
+```bash
+# Cek versi script — harus ada "MAX_RETRY" di dalamnya
+grep 'MAX_RETRY' /etc/wireguard/tunnel-up.sh
+# Jika tidak ada, update script dari repository
+```
+
+**Solusi 2 (Tambahan): Tambah delay di systemd service:**
 ```bash
 mkdir -p /etc/systemd/system/wg-quick@wg0.service.d
 cat > /etc/systemd/system/wg-quick@wg0.service.d/delay.conf << 'EOF'
@@ -534,6 +598,10 @@ EOF
 
 systemctl daemon-reload
 ```
+
+> **Tips:** Gunakan kedua solusi bersamaan untuk keandalan maksimal.
+> Solusi 1 menangani race condition di level script, Solusi 2 memberi
+> jeda waktu tambahan di level systemd.
 
 ---
 
