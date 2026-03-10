@@ -1,0 +1,65 @@
+# ═══════════════════════════════════════════════════════════════
+# WireGuard Host (Gateway) Configuration Template
+# ═══════════════════════════════════════════════════════════════
+# Deploy ke: /etc/wireguard/wg0.conf
+# Permission: chmod 600 /etc/wireguard/wg0.conf
+#
+# Prasyarat di Host:
+#   - sysctl net.ipv4.ip_forward = 1
+#   - Port 51820/UDP terbuka di firewall
+# ═══════════════════════════════════════════════════════════════
+
+[Interface]
+# Private key Host (JANGAN dibagikan)
+# Dapatkan dengan: cat /etc/wireguard/server.key
+PrivateKey = GANTI_DENGAN_SERVER_PRIVATE_KEY
+
+# IP Host di dalam tunnel
+Address = 10.0.0.1/24
+
+# Port WireGuard (default: 51820)
+ListenPort = 51820
+
+# ─── NAT Masquerade ──────────────────────────────────────────
+# Traffic dari subnet tunnel (10.0.0.0/24) yang keluar ke internet
+# akan di-NAT: IP sumber diganti dari 10.0.0.x → IP Public Host.
+#
+# "! -o %i" = traffic yang TIDAK keluar via interface WireGuard
+# %i otomatis diganti wg-quick dengan nama interface (wg0)
+# Ini portable — tidak perlu hardcode "eth0" atau "ens3"
+PostUp  = iptables -t nat -A POSTROUTING -s 10.0.0.0/24 ! -o %i -j MASQUERADE
+PostUp  = iptables -A FORWARD -i %i -j ACCEPT
+PostUp  = iptables -A FORWARD -o %i -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -s 10.0.0.0/24 ! -o %i -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT
+PostDown = iptables -D FORWARD -o %i -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# ─── Client Peers ─────────────────────────────────────────────
+# Satu blok [Peer] per client VPS.
+# Alokasi IP tunnel:
+#   10.0.0.1   = Host (server ini)
+#   10.0.0.2   = Client 1 (VPS B)
+#   10.0.0.3   = Client 2 (VPS C)
+#   10.0.0.4   = Client 3 (tambahan)
+#   ... hingga 10.0.0.254
+
+[Peer]
+# VPS B (Client 1)
+# Dapatkan Public Key dari: cat /etc/wireguard/client.pub (di VPS B)
+PublicKey = GANTI_DENGAN_PUBLIC_KEY_VPS_B
+AllowedIPs = 10.0.0.2/32
+
+[Peer]
+# VPS C (Client 2)
+# Dapatkan Public Key dari: cat /etc/wireguard/client.pub (di VPS C)
+PublicKey = GANTI_DENGAN_PUBLIC_KEY_VPS_C
+AllowedIPs = 10.0.0.3/32
+
+# ─── Tambah client baru ──────────────────────────────────────
+# Copy blok [Peer] di atas dan ganti:
+#   PublicKey = <PUBLIC_KEY_CLIENT_BARU>
+#   AllowedIPs = 10.0.0.X/32    (X = nomor urut berikutnya)
+#
+# Atau tambah tanpa restart:
+#   wg set wg0 peer <KEY> allowed-ips 10.0.0.X/32
+#   (tapi tetap tambahkan ke file ini agar persist setelah reboot)

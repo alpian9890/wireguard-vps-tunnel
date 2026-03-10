@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════════
+# WireGuard Client Configuration Template
+# ═══════════════════════════════════════════════════════════════
+# Deploy ke: /etc/wireguard/wg0.conf
+# Permission: chmod 600 /etc/wireguard/wg0.conf
+#
+# Prasyarat di Client:
+#   - wireguard, iptables, iproute2, resolvconf terinstall
+#   - tunnel-up.sh dan tunnel-down.sh ada di /etc/wireguard/
+#   - Public key Client sudah didaftarkan di VPS Host
+# ═══════════════════════════════════════════════════════════════
+
+[Interface]
+# Private key Client (JANGAN dibagikan)
+# Dapatkan dengan: cat /etc/wireguard/client.key
+PrivateKey = GANTI_DENGAN_CLIENT_PRIVATE_KEY
+
+# IP Client di dalam tunnel
+# Sesuaikan per Client:
+#   VPS B = 10.0.0.2/32
+#   VPS C = 10.0.0.3/32
+#   VPS D = 10.0.0.4/32
+Address = 10.0.0.2/32
+
+# DNS resolver (query DNS juga lewat tunnel)
+DNS = 1.1.1.1, 8.8.8.8
+
+# Table = off → nonaktifkan auto-routing wg-quick
+# Routing diatur oleh tunnel-up.sh dan tunnel-down.sh
+# Ini memberikan kontrol penuh atas urutan eksekusi
+# (CONNMARK harus dipasang SEBELUM default route diubah)
+Table = off
+
+# PostUp: setelah interface aktif, atur routing + CONNMARK
+# %i otomatis diganti wg-quick dengan nama interface (wg0)
+PostUp  = /etc/wireguard/tunnel-up.sh %i
+
+# PreDown: sebelum interface dihapus, kembalikan routing
+PreDown = /etc/wireguard/tunnel-down.sh %i
+
+[Peer]
+# Public key VPS Host
+# Dapatkan dengan: cat /etc/wireguard/server.pub (di VPS Host)
+PublicKey = GANTI_DENGAN_PUBLIC_KEY_VPS_HOST
+
+# IP Public VPS Host + port WireGuard
+# ⚠️ GANTI dengan IP ASLI VPS Host, bukan IP contoh!
+Endpoint = 203.0.113.10:51820
+
+# Terima SEMUA traffic dari peer (full tunnel)
+# Ini berarti semua traffic internet akan melewati tunnel
+AllowedIPs = 0.0.0.0/0
+
+# Kirim keepalive tiap 25 detik agar tunnel tetap hidup
+# Penting untuk NAT traversal dan deteksi koneksi putus
+PersistentKeepalive = 25
