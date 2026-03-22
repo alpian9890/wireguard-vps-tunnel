@@ -97,54 +97,123 @@ systemctl restart wg-quick@wg0
 
 ---
 
-## Health Check dengan Auto-Recovery
+## Health Check dengan Auto-Recovery + Telegram Alert (Standar)
 
-Script health check mengecek 5 aspek kesehatan tunnel dan **otomatis restart jika bermasalah**.
+Standar yang dipakai:
 
-### Deploy Script
+- **Host**: model `vps3.bluerabbit` (cek interface + UDP listen + ip_forward + NAT + umur handshake tiap peer) + **Telegram alert**.
+- **Client**: model `vps2.existentialhit` (cek interface + handshake age + default route + CONNMARK + opsional cek egress IP) + **auto-recovery** + **Telegram alert**.
 
-Script ada di `scripts/wg-health-check.sh` di repository ini.
+Repo ini menyediakan versi yang mengikuti standar tersebut:
+
+- `scripts/wg-telegram-notify.sh` (helper kirim Telegram + **dedup anti-spam**)
+- `scripts/wg-host-health-check-telegram.sh` (HOST)
+- `scripts/wg-health-check-telegram.sh` (CLIENT)
+
+> Catatan: Anda tetap bisa pakai script sederhana `scripts/wg-health-check.sh`, tapi **tidak** mengirim alert Telegram dan coverage check-nya lebih minim.
+
+---
+
+### Prasyarat (wajib untuk Telegram)
+
+Siapkan environment variable di server:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+Disarankan simpan di file environment khusus systemd, contoh:
 
 ```bash
-# Copy ke /usr/local/bin/
-cp scripts/wg-health-check.sh /usr/local/bin/wg-health-check.sh
+cat > /etc/default/wg-telegram << 'EOF'
+TELEGRAM_BOT_TOKEN=123456:ABCDEF...
+TELEGRAM_CHAT_ID=6069426587
+EOF
+chmod 600 /etc/default/wg-telegram
+```
+
+---
+
+### Deploy: helper Telegram
+
+```bash
+cp scripts/wg-telegram-notify.sh /usr/local/bin/wg-telegram-notify.sh
+chmod +x /usr/local/bin/wg-telegram-notify.sh
+```
+
+Test cepat:
+
+```bash
+TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... \
+  /usr/local/bin/wg-telegram-notify.sh "WG ALERT test: $(hostname)" "test-$(hostname)"
+```
+
+---
+
+### Deploy: HEALTH CHECK (CLIENT)
+
+```bash
+cp scripts/wg-health-check-telegram.sh /usr/local/bin/wg-health-check.sh
 chmod +x /usr/local/bin/wg-health-check.sh
 ```
 
-Atau download langsung:
+Test manual:
 
 ```bash
-curl -o /usr/local/bin/wg-health-check.sh \
-    https://raw.githubusercontent.com/<USER>/<REPO>/main/scripts/wg-health-check.sh
-chmod +x /usr/local/bin/wg-health-check.sh
+# tanpa cek egress IP
+HS_MAX_AGE=600 /usr/local/bin/wg-health-check.sh wg0
+
+# dengan cek egress IP (expected = IP publik host)
+HS_MAX_AGE=600 /usr/local/bin/wg-health-check.sh wg0 <IP_PUBLIK_HOST>
 ```
 
-### Test Manual
+Check yang dilakukan (client):
+
+- interface wg aktif
+- handshake age <= `HS_MAX_AGE` (default 600s)
+- default route via wg
+- CONNMARK rules ada
+- (opsional) verifikasi egress IP via `ifconfig.me` (soft warning bila timeout)
+
+Jika ada problem:
+
+- attempt recovery (restart wg-quick@wg0)
+- kirim Telegram `WG ALERT [RECOVERED|FAILED] ...`
+
+---
+
+### Deploy: HEALTH CHECK (HOST)
 
 ```bash
-# Check kesehatan saja
-wg-health-check.sh wg0
-
-# Check kesehatan + verifikasi IP VPS Host
-wg-health-check.sh wg0 103.253.212.145
+cp scripts/wg-host-health-check-telegram.sh /usr/local/bin/wg-host-health-check.sh
+chmod +x /usr/local/bin/wg-host-health-check.sh
 ```
 
-### Apa yang Dicek?
+Test manual:
 
-| # | Check | Pass jika |
-|---|-------|-----------|
-| 1 | Interface aktif | `ip link show wg0` berhasil |
-| 2 | Handshake segar | Handshake terakhir < 180 detik lalu |
-| 3 | Default route | Default route via wg0 |
-| 4 | IP sesuai | `curl ifconfig.me` = IP VPS Host (opsional) |
-| 5 | CONNMARK aktif | iptables rule ada |
+```bash
+HS_MAX_AGE=600 /usr/local/bin/wg-host-health-check.sh wg0
+```
 
-Jika salah satu check gagal → otomatis restart `wg-quick@wg0`.
+Check yang dilakukan (host):
+
+- interface wg aktif
+- UDP 51820 listening
+- ip_forward=1
+- NAT MASQUERADE rule ada
+- semua peer punya handshake segar (<= `HS_MAX_AGE`)
+
+Jika ada problem: kirim Telegram `WG ALERT [HOST PROBLEM] ...`
+
+---
 
 ### Log
 
 ```bash
+# Client
 tail -f /var/log/wg-health-check.log
+
+# Host
+tail -f /var/log/wg-host-health-check.log
 ```
 
 ---
@@ -153,19 +222,20 @@ tail -f /var/log/wg-health-check.log
 
 Systemd timer lebih baik dari cron: terintegrasi journalctl, lebih presisi, bisa lihat status.
 
-### Buat Service Unit
+### Buat Service Unit (CLIENT)
 
 ```bash
 cat > /etc/systemd/system/wg-health-check.service << 'EOF'
 [Unit]
-Description=WireGuard tunnel health check
+Description=WireGuard tunnel health check (client)
 After=network-online.target wg-quick@wg0.service
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-# Ganti 203.0.113.10 dengan IP publik VPS Host Anda
-ExecStart=/usr/local/bin/wg-health-check.sh wg0 203.0.113.10
+EnvironmentFile=/etc/default/wg-telegram
+# Ganti <IP_PUBLIK_HOST> dengan IP publik VPS Host Anda
+ExecStart=/usr/local/bin/wg-health-check.sh wg0 <IP_PUBLIK_HOST>
 EOF
 ```
 
@@ -174,7 +244,35 @@ EOF
 ```bash
 cat > /etc/systemd/system/wg-health-check.timer << 'EOF'
 [Unit]
-Description=Run WireGuard health check setiap 5 menit
+Description=Run WireGuard health check every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+EOF
+```
+
+### (Opsional) Unit untuk HOST
+
+```bash
+cat > /etc/systemd/system/wg-host-health-check.service << 'EOF'
+[Unit]
+Description=WireGuard tunnel health check (host)
+After=network-online.target wg-quick@wg0.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/default/wg-telegram
+ExecStart=/usr/local/bin/wg-host-health-check.sh wg0
+EOF
+
+cat > /etc/systemd/system/wg-host-health-check.timer << 'EOF'
+[Unit]
+Description=Run WireGuard host health check every 5 minutes
 
 [Timer]
 OnBootSec=2min
