@@ -101,7 +101,7 @@ systemctl restart wg-quick@wg0
 
 Standar yang dipakai:
 
-- **Host**: model `vps3.bluerabbit` (cek interface + UDP listen + ip_forward + NAT + umur handshake tiap peer) + **Telegram alert**.
+- **Host**: model `vps3.bluerabbit` (cek interface + UDP listen pada **listen-port WireGuard aktif** + ip_forward + NAT + umur handshake tiap peer) + **Telegram alert**.
 - **Client**: model `vps2.existentialhit` (cek interface + handshake age + default route + CONNMARK + opsional cek egress IP) + **auto-recovery** + **Telegram alert**.
 
 Repo ini menyediakan versi yang mengikuti standar tersebut:
@@ -197,10 +197,14 @@ HS_MAX_AGE=600 /usr/local/bin/wg-host-health-check.sh wg0
 Check yang dilakukan (host):
 
 - interface wg aktif
-- UDP 51820 listening
+- UDP pada **listen-port WireGuard aktif** listening (default biasanya `51820`, tapi script tidak meng-hardcode port)
 - ip_forward=1
 - NAT MASQUERADE rule ada
 - semua peer punya handshake segar (<= `HS_MAX_AGE`)
+
+Catatan implementasi:
+- Script host mengambil port dari `wg show <iface> listen-port`, lalu mencocokkannya dengan output `ss`.
+- Pendekatan ini menghindari false positive dari pipeline `ss | grep -q` saat script dijalankan dengan `set -o pipefail`.
 
 Jika ada problem: kirim Telegram `WG ALERT [HOST PROBLEM] ...`
 

@@ -412,8 +412,9 @@ iptables -t nat -L POSTROUTING -n -v
 
 ```bash
 # 5. Port listening
-ss -ulnp | grep 51820
-# Harus ada: udp UNCONN 0 0 0.0.0.0:51820
+LISTEN_PORT=$(wg show wg0 listen-port)
+ss -H -uln | grep ":${LISTEN_PORT}"
+# Harus ada baris UDP untuk listen-port WireGuard (default biasanya 51820)
 ```
 
 ```bash

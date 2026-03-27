@@ -34,8 +34,21 @@ fail(){ OUT+="  ✗ $*\n"; FAIL=1; }
 
 hn=$(hostname)
 
-if ip link show "$WG_IFACE" &>/dev/null; then pass "Interface $WG_IFACE aktif"; else fail "Interface $WG_IFACE TIDAK aktif"; fi
-if ss -ulnp 2>/dev/null | grep -q ":51820"; then pass "UDP 51820 listening"; else fail "UDP 51820 tidak listening"; fi
+if ip link show "$WG_IFACE" &>/dev/null; then
+  pass "Interface $WG_IFACE aktif"
+else
+  fail "Interface $WG_IFACE TIDAK aktif"
+fi
+
+listen_port=$(wg show "$WG_IFACE" listen-port 2>/dev/null || true)
+udp_listeners=$(ss -H -uln 2>/dev/null || true)
+if [[ -n "$listen_port" && "$listen_port" -gt 0 ]] \
+   && grep -qE "(^|[[:space:]])([^[:space:]]+:)?${listen_port}([[:space:]]|$)" <<< "$udp_listeners"; then
+  pass "UDP ${listen_port} listening"
+else
+  fail "UDP ${listen_port:-unknown} tidak listening"
+fi
+
 if sysctl -n net.ipv4.ip_forward 2>/dev/null | grep -q '^1$'; then pass "ip_forward=1"; else fail "ip_forward!=1"; fi
 if iptables -t nat -C POSTROUTING -s 10.0.0.0/24 ! -o "$WG_IFACE" -j MASQUERADE 2>/dev/null; then pass "NAT MASQUERADE rule OK"; else fail "NAT MASQUERADE rule missing"; fi
 

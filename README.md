@@ -189,6 +189,8 @@ ssh vps-c    # Otomatis lewat VPS Host → ke VPS C
 | [tunnel-up.sh](scripts/tunnel-up.sh) | Client: `/etc/wireguard/` | Aktifkan routing tunnel + CONNMARK |
 | [tunnel-down.sh](scripts/tunnel-down.sh) | Client: `/etc/wireguard/` | Kembalikan routing ke normal |
 | [wg-health-check.sh](scripts/wg-health-check.sh) | Client: `/usr/local/bin/` | Health check + auto-recovery |
+| [wg-host-health-check-telegram.sh](scripts/wg-host-health-check-telegram.sh) | Host: `/usr/local/bin/` | Host health check + Telegram alert |
+| [wg-telegram-notify.sh](scripts/wg-telegram-notify.sh) | Host/Client: `/usr/local/bin/` | Helper kirim Telegram + dedup alert |
 | [wg0-host.conf.example](configs/wg0-host.conf.example) | Host: `/etc/wireguard/wg0.conf` | Template config WireGuard Host |
 | [wg0-client.conf.example](configs/wg0-client.conf.example) | Client: `/etc/wireguard/wg0.conf` | Template config WireGuard Client |
 

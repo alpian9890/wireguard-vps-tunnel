@@ -337,6 +337,37 @@ chmod +x /etc/wireguard/tunnel-down.sh
 
 ---
 
+### Problem: Host health-check melaporkan `UDP 51820 tidak listening`, padahal WireGuard normal
+
+**Gejala:**
+- `wg show` menampilkan `listening port: 51820`
+- `ss -ulnp | grep 51820` juga menampilkan port WireGuard
+- tapi `wg-host-health-check.sh` tetap fail di check UDP listening
+
+**Penyebab:**
+Versi awal script host memakai pipeline seperti ini:
+
+```bash
+ss -ulnp | grep -q ":51820"
+```
+
+Saat script dijalankan dengan `set -o pipefail`, `grep -q` bisa selesai lebih dulu setelah menemukan match, lalu `ss` menerima `SIGPIPE`. Akibatnya status pipeline bisa dianggap gagal dan muncul **false positive** walaupun port sebenarnya listening.
+
+**Solusi:**
+- Update ke versi script terbaru dari repository.
+- Versi terbaru mengambil port dari `wg show <iface> listen-port`, lalu mencocokkannya tanpa pipeline `grep -q` langsung ke output `ss`.
+
+**Verifikasi:**
+```bash
+wg show wg0 listen-port
+ss -H -uln | grep ":$(wg show wg0 listen-port)"
+/usr/local/bin/wg-host-health-check.sh wg0
+```
+
+Jika verifikasi manual match dan script versi baru pass, berarti masalah sebelumnya memang false positive.
+
+---
+
 ### Problem: Tidak ada handshake (tunnel tidak established)
 
 **Langkah debugging:**
