@@ -55,7 +55,7 @@ fi
 
 # 2) Handshake
 if [[ "$FAIL" -eq 0 ]]; then
-  last_hs=$(wg show "$WG_IFACE" latest-handshakes 2>/dev/null | awk '{print $2}' | head -1 || true)
+  last_hs=$(wg show "$WG_IFACE" latest-handshakes 2>/dev/null | awk 'NR==1{print $2; exit}' || true)
   now=$(date +%s)
   if [[ -n "$last_hs" && "$last_hs" -gt 0 ]]; then
     AGE=$(( now - last_hs ))
@@ -71,7 +71,7 @@ fi
 
 # 3) Default route
 if [[ "$FAIL" -eq 0 ]]; then
-  ROUTE=$(ip -4 route show default | head -1 | tr -s ' ')
+  ROUTE=$(ip -4 route show default 2>/dev/null | sed -n '1p' | tr -s ' ' || true)
   if echo "$ROUTE" | grep -qE "\\bdev\\s+${WG_IFACE}\\b"; then
     pass "Default route via $WG_IFACE"
   else
@@ -131,7 +131,7 @@ fi
 
 # Telegram notify
 utc=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-route_now=$(ip -4 route show default | head -1 | tr -s ' ' 2>/dev/null || true)
+route_now=$(ip -4 route show default 2>/dev/null | sed -n '1p' | tr -s ' ' || true)
 eg_now=$(curl -4 -s --max-time 8 ifconfig.me 2>/dev/null || true)
 status="FAILED"; [[ "$recovered" -eq 1 ]] && status="RECOVERED"
 

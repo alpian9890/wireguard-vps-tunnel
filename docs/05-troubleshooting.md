@@ -368,6 +368,37 @@ Jika verifikasi manual match dan script versi baru pass, berarti masalah sebelum
 
 ---
 
+### Problem: Client health-check exit `141` / berhenti mendadak tanpa output lengkap
+
+**Gejala:**
+- `/usr/local/bin/wg-health-check.sh wg0` berhenti dengan exit code `141`
+- output berhenti di tengah, sering setelah check handshake atau route
+- tunnel sebenarnya masih aktif dan `wg show` tampak normal
+
+**Penyebab:**
+Versi awal script client memakai pipeline seperti ini:
+
+```bash
+wg show "$WG_IFACE" latest-handshakes | awk '{print $2}' | head -1
+ip -4 route show default | head -1 | tr -s ' '
+```
+
+Dengan `set -o pipefail`, pemakaian `head -1` bisa memicu `SIGPIPE` pada proses sebelumnya, lalu seluruh pipeline dianggap gagal dan script exit `141`.
+
+**Solusi:**
+- Update ke versi script client terbaru dari repository.
+- Versi terbaru mengganti pipeline tersebut dengan bentuk yang aman untuk `pipefail`.
+
+**Verifikasi:**
+```bash
+/usr/local/bin/wg-health-check.sh wg0
+echo $?
+```
+
+Jika output lengkap muncul dan exit code `0`, berarti masalah sudah teratasi.
+
+---
+
 ### Problem: Tidak ada handshake (tunnel tidak established)
 
 **Langkah debugging:**
