@@ -1,6 +1,6 @@
 {
   "name": "wireguard-vps-tunnel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "WireGuard Manager CLI/TUI for multi-VPS host-client operations",
   "type": "commonjs",
   "main": "dist/index.js",
@@ -26,7 +26,8 @@
     "assets": [
       "configs/*.example",
       "scripts/*.sh",
-      "docs/*.md"
+      "docs/*.md",
+      "node_modules/blessed/usr/**/*"
     ],
     "targets": [
       "node18-linux-x64"

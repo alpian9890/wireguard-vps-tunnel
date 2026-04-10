@@ -1,5 +1,6 @@
 import blessed from 'blessed';
 
+import { AppError } from '../core/errors';
 import { loadInventory } from '../core/inventory/store';
 
 function appendLog(log: blessed.Widgets.Log, message: string): void {
@@ -8,6 +9,10 @@ function appendLog(log: blessed.Widgets.Log, message: string): void {
 }
 
 export async function startTui(): Promise<void> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new AppError('wgm tui harus dijalankan di terminal interaktif (TTY).');
+  }
+
   const screen = blessed.screen({
     smartCSR: true,
     title: 'WireGuard Manager TUI',
@@ -111,4 +116,3 @@ export async function startTui(): Promise<void> {
 
   screen.render();
 }
-

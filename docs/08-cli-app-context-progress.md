@@ -160,6 +160,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Fondasi aplikasi v0.1 dibuat: TypeScript project, inventory loader/schema, SSH executor, command structure, tunnel/peer/doctor command awal, dan TUI dasar. |
 | 2026-04-10 | `host init` dan `client init` diimplementasikan: host bisa bootstrap + create client profile, client bisa setup lalu register peer ke host secara otomatis. |
 | 2026-04-10 | Release binary pertama dibuat (`v0.1.0`), asset `wgm-linux-x64` di-upload ke GitHub Release, installer script `scripts/install-wgm.sh` ditambahkan, dan one-liner install ditulis di README. |
+| 2026-04-10 | Perbaikan release: fix bundling asset `blessed` agar `wgm tui` jalan di binary `pkg`, tambah guard TTY untuk `wgm tui`, dan installer menampilkan progress proses/download. |
 
 ---
 

@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import packageJson from '../../package.json';
 
 import { registerClientCommands } from './commands/client';
 import { registerDoctorCommands } from './commands/doctor';
@@ -14,7 +15,7 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
   program
     .name('wgm')
     .description('WireGuard Manager CLI/TUI')
-    .version('0.1.0-alpha')
+    .version(packageJson.version)
     .showHelpAfterError();
 
   registerInventoryCommands(program);
@@ -27,4 +28,3 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
 
   await program.parseAsync(argv);
 }
-

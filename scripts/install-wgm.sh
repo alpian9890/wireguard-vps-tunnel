@@ -19,17 +19,29 @@ need_cmd() {
   }
 }
 
+info() {
+  echo "[wgm-installer] $*"
+}
+
 download() {
   local url="$1"
   local out="$2"
 
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$url" -o "$out"
+    if [[ -t 1 ]]; then
+      curl -fL --progress-bar "$url" -o "$out"
+    else
+      curl -fsSL "$url" -o "$out"
+    fi
     return
   fi
 
   if command -v wget >/dev/null 2>&1; then
-    wget -qO "$out" "$url"
+    if [[ -t 1 ]]; then
+      wget -O "$out" "$url"
+    else
+      wget -qO "$out" "$url"
+    fi
     return
   fi
 
@@ -46,16 +58,20 @@ else
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${ASSET_NAME}"
 fi
 
-echo "Mengunduh ${ASSET_NAME} dari ${DOWNLOAD_URL}"
+info "1/4 Memulai installer"
+info "2/4 Mengunduh ${ASSET_NAME}"
+info "     URL: ${DOWNLOAD_URL}"
 download "$DOWNLOAD_URL" "$TMP_DIR/wgm"
+info "3/4 Menyiapkan binary"
 chmod +x "$TMP_DIR/wgm"
 
 if [[ -w "$(dirname "$INSTALL_PATH")" ]]; then
   mv "$TMP_DIR/wgm" "$INSTALL_PATH"
 else
   need_cmd sudo
+  info "     Memerlukan sudo untuk menulis ke $(dirname "$INSTALL_PATH")"
   sudo mv "$TMP_DIR/wgm" "$INSTALL_PATH"
 fi
 
-echo "Install selesai: $INSTALL_PATH"
+info "4/4 Install selesai: $INSTALL_PATH"
 "$INSTALL_PATH" --version
