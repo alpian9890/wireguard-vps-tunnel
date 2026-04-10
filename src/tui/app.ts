@@ -71,7 +71,7 @@ function buildCommandInvocation(args: string[]): { command: string; commandArgs:
   const isPkg = Boolean((process as NodeJS.Process & { pkg?: unknown }).pkg);
 
   if (isPkg) {
-    return { command: process.execPath, commandArgs: args };
+    return { command: 'wgm', commandArgs: args };
   }
 
   return {
@@ -92,6 +92,11 @@ async function runWgmCommand(
     const child = spawn(command, commandArgs, {
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    child.on('error', (error: Error) => {
+      appendLog(log, `ERROR spawn: ${error.message}`);
+      resolve(1);
     });
 
     child.stdout.on('data', (chunk: Buffer) => {

@@ -165,6 +165,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Perbaikan release: fix bundling asset `blessed` agar `wgm tui` jalan di binary `pkg`, tambah guard TTY untuk `wgm tui`, dan installer menampilkan progress proses/download. |
 | 2026-04-10 | Tambah command `wgm uninstall` dengan konfirmasi interaktif, opsi `--yes`, dan opsi `--purge-config` untuk hapus inventory lokal. |
 | 2026-04-10 | TUI direvisi agar bisa menjalankan seluruh command operasional utama langsung dari menu + form input (inventory, host/client init, tunnel, peer, doctor, uninstall). |
+| 2026-04-10 | Fix eksekusi command dari TUI pada binary `pkg`: self-invocation dijalankan via command `wgm` (PATH) sehingga menu `Inventory` dan `Uninstall` berjalan normal pada instalasi binary. |
 
 ---
 
