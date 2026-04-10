@@ -144,10 +144,10 @@ Gunakan checklist berikut sebagai progress utama tim.
 
 ### Phase 5 — Packaging & Release
 
-- [ ] Build production
-- [ ] Bundle single binary via `pkg`
+- [x] Build production
+- [x] Bundle single binary via `pkg`
 - [ ] Uji di Debian/Ubuntu minimal
-- [ ] Dokumentasi penggunaan tim
+- [x] Dokumentasi penggunaan tim
 - [ ] Rilis v1 internal
 
 ---
@@ -159,6 +159,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Dokumen context/progress dibuat, roadmap awal dan checklist fase ditetapkan. |
 | 2026-04-10 | Fondasi aplikasi v0.1 dibuat: TypeScript project, inventory loader/schema, SSH executor, command structure, tunnel/peer/doctor command awal, dan TUI dasar. |
 | 2026-04-10 | `host init` dan `client init` diimplementasikan: host bisa bootstrap + create client profile, client bisa setup lalu register peer ke host secara otomatis. |
+| 2026-04-10 | Release binary pertama dibuat (`v0.1.0`), asset `wgm-linux-x64` di-upload ke GitHub Release, installer script `scripts/install-wgm.sh` ditambahkan, dan one-liner install ditulis di README. |
 
 ---
 
