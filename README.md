@@ -215,6 +215,22 @@ Detail roadmap + checklist tim ada di:
 
 ---
 
+## Install WGM (Binary)
+
+Install 1 baris via **curl**:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | bash
+```
+
+Install 1 baris via **wget**:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | bash
+```
+
+---
+
 ## Urutan Pengerjaan
 
 ```
