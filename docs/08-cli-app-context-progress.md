@@ -71,8 +71,8 @@ Area dan action awal:
 - `tunnel status|up|down|restart`
 - `peer list|add|remove`
 - `doctor quick`
-- `host init` (stub sementara)
-- `client init` (stub sementara)
+- `host init` (setup host + optional create client profile)
+- `client init` (setup client + auto connect ke host)
 - `tui`
 
 ---
@@ -121,8 +121,8 @@ Gunakan checklist berikut sebagai progress utama tim.
 
 ### Phase 2 — Command Operasional Inti
 
-- [ ] Implement `host init`
-- [ ] Implement `client init`
+- [x] Implement `host init`
+- [x] Implement `client init`
 - [x] Implement `peer add`
 - [x] Implement `peer remove`
 - [x] Implement `peer list`
@@ -158,6 +158,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 |---|---|
 | 2026-04-10 | Dokumen context/progress dibuat, roadmap awal dan checklist fase ditetapkan. |
 | 2026-04-10 | Fondasi aplikasi v0.1 dibuat: TypeScript project, inventory loader/schema, SSH executor, command structure, tunnel/peer/doctor command awal, dan TUI dasar. |
+| 2026-04-10 | `host init` dan `client init` diimplementasikan: host bisa bootstrap + create client profile, client bisa setup lalu register peer ke host secara otomatis. |
 
 ---
 

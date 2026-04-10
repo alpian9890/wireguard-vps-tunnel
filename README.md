@@ -206,6 +206,8 @@ Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
 - Operasi tunnel (`tunnel status|up|down|restart`)
 - Operasi peer live (`peer list|add|remove`)
 - Diagnostik cepat (`doctor quick`)
+- Setup host + buat client profile (`host init`)
+- Setup client + konek otomatis ke host (`client init`)
 - TUI dasar (`wgm tui`)
 
 Detail roadmap + checklist tim ada di:
