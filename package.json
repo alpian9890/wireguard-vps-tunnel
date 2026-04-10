@@ -1,0 +1,72 @@
+{
+  "name": "wireguard-vps-tunnel",
+  "version": "1.0.0",
+  "description": "WireGuard Manager CLI/TUI for multi-VPS host-client operations",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "bin": {
+    "wgm": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pkg": {
+    "scripts": [
+      "dist/**/*.js"
+    ],
+    "assets": [
+      "configs/*.example",
+      "scripts/*.sh",
+      "docs/*.md"
+    ],
+    "targets": [
+      "node20-linux-x64"
+    ],
+    "outputPath": "build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alpian9890/wireguard-vps-tunnel.git"
+  },
+  "keywords": [
+    "wireguard",
+    "cli",
+    "tui",
+    "vps",
+    "tunnel"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alpian9890/wireguard-vps-tunnel/issues"
+  },
+  "homepage": "https://github.com/alpian9890/wireguard-vps-tunnel#readme",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "execa": "^8.0.1",
+    "ssh2": "^1.15.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.25",
+    "@types/node": "^22.10.2",
+    "@types/ssh2": "^1.15.5",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^8.57.1",
+    "pkg": "^5.8.1",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

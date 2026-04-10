@@ -181,6 +181,7 @@ ssh vps-c    # Otomatis lewat VPS Host → ke VPS C
 | 5 | [Troubleshooting](docs/05-troubleshooting.md) | Semua masalah yang ditemukan + solusi (dari deployment nyata) |
 | 6 | [Skenario Lanjutan & What-If](docs/06-skenario-lanjutan.md) | Scaling, edge cases, migrasi host, split tunnel |
 | 7 | [Referensi Cepat](docs/07-referensi-cepat.md) | Semua perintah penting dalam satu halaman |
+| 8 | [Context & Progress Aplikasi CLI](docs/08-cli-app-context-progress.md) | Konteks pembuatan aplikasi CLI/TUI + roadmap dan checklist progres tim |
 
 ### Script & Config
 
@@ -193,6 +194,22 @@ ssh vps-c    # Otomatis lewat VPS Host → ke VPS C
 | [wg-telegram-notify.sh](scripts/wg-telegram-notify.sh) | Host/Client: `/usr/local/bin/` | Helper kirim Telegram + dedup alert |
 | [wg0-host.conf.example](configs/wg0-host.conf.example) | Host: `/etc/wireguard/wg0.conf` | Template config WireGuard Host |
 | [wg0-client.conf.example](configs/wg0-client.conf.example) | Client: `/etc/wireguard/wg0.conf` | Template config WireGuard Client |
+
+---
+
+## Status Pengembangan CLI/TUI
+
+Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
+
+- Struktur command `wgm <area> <action>`
+- Inventory multi-server (`inventory init|list|add|remove|show`)
+- Operasi tunnel (`tunnel status|up|down|restart`)
+- Operasi peer live (`peer list|add|remove`)
+- Diagnostik cepat (`doctor quick`)
+- TUI dasar (`wgm tui`)
+
+Detail roadmap + checklist tim ada di:
+**[docs/08-cli-app-context-progress.md](docs/08-cli-app-context-progress.md)**
 
 ---
 
