@@ -208,6 +208,7 @@ Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
 - Diagnostik cepat (`doctor quick`)
 - Setup host + buat client profile (`host init`)
 - Setup client + konek otomatis ke host (`client init`)
+- Uninstall CLI (`wgm uninstall`)
 - TUI dasar (`wgm tui`)
 
 Detail roadmap + checklist tim ada di:

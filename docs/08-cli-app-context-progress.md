@@ -73,6 +73,7 @@ Area dan action awal:
 - `doctor quick`
 - `host init` (setup host + optional create client profile)
 - `client init` (setup client + auto connect ke host)
+- `uninstall` (hapus binary wgm, optional purge config)
 - `tui`
 
 ---
@@ -127,6 +128,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 - [x] Implement `peer remove`
 - [x] Implement `peer list`
 - [x] Implement `tunnel up|down|restart|status`
+- [x] Implement `uninstall` command
 
 ### Phase 3 — Diagnostik & Troubleshooting
 
@@ -161,6 +163,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | `host init` dan `client init` diimplementasikan: host bisa bootstrap + create client profile, client bisa setup lalu register peer ke host secara otomatis. |
 | 2026-04-10 | Release binary pertama dibuat (`v0.1.0`), asset `wgm-linux-x64` di-upload ke GitHub Release, installer script `scripts/install-wgm.sh` ditambahkan, dan one-liner install ditulis di README. |
 | 2026-04-10 | Perbaikan release: fix bundling asset `blessed` agar `wgm tui` jalan di binary `pkg`, tambah guard TTY untuk `wgm tui`, dan installer menampilkan progress proses/download. |
+| 2026-04-10 | Tambah command `wgm uninstall` dengan konfirmasi interaktif, opsi `--yes`, dan opsi `--purge-config` untuk hapus inventory lokal. |
 
 ---
 

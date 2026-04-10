@@ -8,6 +8,7 @@ import { registerInventoryCommands } from './commands/inventory';
 import { registerPeerCommands } from './commands/peer';
 import { registerTunnelCommands } from './commands/tunnel';
 import { registerTuiCommand } from './commands/tui';
+import { registerUninstallCommand } from './commands/uninstall';
 
 export async function runCli(argv: string[] = process.argv): Promise<void> {
   const program = new Command();
@@ -25,6 +26,7 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
   registerHostCommands(program);
   registerClientCommands(program);
   registerTuiCommand(program);
+  registerUninstallCommand(program);
 
   await program.parseAsync(argv);
 }
