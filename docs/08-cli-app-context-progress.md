@@ -74,7 +74,7 @@ Area dan action awal:
 - `host init` (setup host + optional create client profile)
 - `client init` (setup client + auto connect ke host)
 - `uninstall` (hapus binary wgm, optional purge config)
-- `tui`
+- `tui` (menu operasional untuk command utama + form input)
 
 ---
 
@@ -142,7 +142,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 - [x] Layout TUI utama (menu, panel status, panel log)
 - [x] Navigasi keyboard (arrow/enter/esc)
 - [ ] Form input aman untuk secret/key
-- [ ] Integrasi seluruh operasi inti ke TUI
+- [x] Integrasi seluruh operasi inti ke TUI
 
 ### Phase 5 — Packaging & Release
 
@@ -164,6 +164,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Release binary pertama dibuat (`v0.1.0`), asset `wgm-linux-x64` di-upload ke GitHub Release, installer script `scripts/install-wgm.sh` ditambahkan, dan one-liner install ditulis di README. |
 | 2026-04-10 | Perbaikan release: fix bundling asset `blessed` agar `wgm tui` jalan di binary `pkg`, tambah guard TTY untuk `wgm tui`, dan installer menampilkan progress proses/download. |
 | 2026-04-10 | Tambah command `wgm uninstall` dengan konfirmasi interaktif, opsi `--yes`, dan opsi `--purge-config` untuk hapus inventory lokal. |
+| 2026-04-10 | TUI direvisi agar bisa menjalankan seluruh command operasional utama langsung dari menu + form input (inventory, host/client init, tunnel, peer, doctor, uninstall). |
 
 ---
 

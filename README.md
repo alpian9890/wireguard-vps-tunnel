@@ -209,7 +209,7 @@ Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
 - Setup host + buat client profile (`host init`)
 - Setup client + konek otomatis ke host (`client init`)
 - Uninstall CLI (`wgm uninstall`)
-- TUI dasar (`wgm tui`)
+- TUI operasional untuk inventory/host/client/tunnel/peer/doctor/uninstall (`wgm tui`)
 
 Detail roadmap + checklist tim ada di:
 **[docs/08-cli-app-context-progress.md](docs/08-cli-app-context-progress.md)**
