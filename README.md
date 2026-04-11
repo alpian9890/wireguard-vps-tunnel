@@ -182,6 +182,7 @@ ssh vps-c    # Otomatis lewat VPS Host → ke VPS C
 | 6 | [Skenario Lanjutan & What-If](docs/06-skenario-lanjutan.md) | Scaling, edge cases, migrasi host, split tunnel |
 | 7 | [Referensi Cepat](docs/07-referensi-cepat.md) | Semua perintah penting dalam satu halaman |
 | 8 | [Context & Progress Aplikasi CLI](docs/08-cli-app-context-progress.md) | Konteks pembuatan aplikasi CLI/TUI + roadmap dan checklist progres tim |
+| 9 | [Panduan Penggunaan WGM (CLI & TUI)](docs/09-panduan-penggunaan-wgm-cli-tui.md) | Cara pakai lengkap aplikasi `wgm`: setup host/client, manajemen peer, disconnect, dan alur operasional harian |
 
 ### Script & Config
 
