@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPO="${WGM_REPO:-alpian9890/wireguard-vps-tunnel}"
 VERSION="${WGM_VERSION:-latest}"
-ASSET_NAME="${WGM_ASSET_NAME:-wgm-linux-x64}"
+ASSET_NAME="${WGM_ASSET_NAME:-}"
 INSTALL_PATH="${WGM_INSTALL_PATH:-/usr/local/bin/wgm}"
 TMP_DIR="$(mktemp -d)"
 
@@ -37,11 +37,7 @@ download() {
   fi
 
   if command -v wget >/dev/null 2>&1; then
-    if [[ -t 1 ]]; then
-      wget -O "$out" "$url"
-    else
-      wget -qO "$out" "$url"
-    fi
+    wget --show-progress --progress=bar:force:noscroll -O "$out" "$url"
     return
   fi
 
@@ -52,17 +48,53 @@ download() {
 need_cmd chmod
 need_cmd mktemp
 
+detect_asset_name() {
+  if [[ -n "$ASSET_NAME" ]]; then
+    info "Arsitektur override via WGM_ASSET_NAME=${ASSET_NAME}"
+    return
+  fi
+
+  local os arch
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
+
+  if [[ "$os" != "linux" ]]; then
+    echo "Error: OS '$os' belum didukung installer binary ini." >&2
+    exit 1
+  fi
+
+  case "$arch" in
+    x86_64|amd64)
+      ASSET_NAME="wgm-linux-x64"
+      ;;
+    aarch64|arm64)
+      ASSET_NAME="wgm-linux-arm64"
+      ;;
+    *)
+      echo "Error: Arsitektur '$arch' belum didukung." >&2
+      echo "Set manual asset dengan WGM_ASSET_NAME jika Anda punya build custom." >&2
+      exit 1
+      ;;
+  esac
+
+  info "Deteksi arsitektur: os=${os}, arch=${arch}, asset=${ASSET_NAME}"
+}
+
+detect_asset_name
+
 if [[ "$VERSION" == "latest" ]]; then
   DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/${ASSET_NAME}"
 else
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${ASSET_NAME}"
 fi
 
-info "1/4 Memulai installer"
-info "2/4 Mengunduh ${ASSET_NAME}"
+info "1/5 Memulai installer"
+info "2/5 Menentukan binary target"
+info "     Asset: ${ASSET_NAME}"
+info "3/5 Mengunduh ${ASSET_NAME}"
 info "     URL: ${DOWNLOAD_URL}"
 download "$DOWNLOAD_URL" "$TMP_DIR/wgm"
-info "3/4 Menyiapkan binary"
+info "4/5 Menyiapkan binary"
 chmod +x "$TMP_DIR/wgm"
 
 if [[ -w "$(dirname "$INSTALL_PATH")" ]]; then
@@ -73,5 +105,5 @@ else
   sudo mv "$TMP_DIR/wgm" "$INSTALL_PATH"
 fi
 
-info "4/4 Install selesai: $INSTALL_PATH"
+info "5/5 Install selesai: $INSTALL_PATH"
 "$INSTALL_PATH" --version

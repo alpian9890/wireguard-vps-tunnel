@@ -219,6 +219,10 @@ Detail roadmap + checklist tim ada di:
 
 ## Install WGM (Binary)
 
+Installer otomatis mendeteksi arsitektur Linux:
+- `x86_64/amd64` → `wgm-linux-x64`
+- `aarch64/arm64` → `wgm-linux-arm64`
+
 Install 1 baris via **curl**:
 
 ```bash
@@ -229,6 +233,12 @@ Install 1 baris via **wget**:
 
 ```bash
 wget -qO- https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | bash
+```
+
+Jika perlu override asset secara manual:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | WGM_ASSET_NAME=wgm-linux-arm64 bash
 ```
 
 ---

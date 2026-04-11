@@ -167,6 +167,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | TUI direvisi agar bisa menjalankan seluruh command operasional utama langsung dari menu + form input (inventory, host/client init, tunnel, peer, doctor, uninstall). |
 | 2026-04-10 | Fix eksekusi command dari TUI pada binary `pkg`: TUI mengeksekusi `env -u PKG_* wgm ...` via `bash -lc` agar child process tidak masuk mode node-invoke; menu `Inventory`/`Uninstall` berjalan normal. |
 | 2026-04-10 | Hotfix TUI: perbaiki error `Cannot find module '/root/inventory'` saat pilih menu `Inventory Init/List` dengan menormalkan eksekusi subprocess pada binary release. |
+| 2026-04-11 | Packaging multi-arsitektur ditambahkan: release binary untuk `linux-x64` dan `linux-arm64`; installer auto-detect arsitektur + tampilan progress download dirombak agar lebih informatif. |
 
 ---
 

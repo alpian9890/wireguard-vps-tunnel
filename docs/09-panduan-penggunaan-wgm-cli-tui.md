@@ -54,6 +54,16 @@ Alternatif:
 wget -qO- https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | bash
 ```
 
+Installer akan auto-detect arsitektur:
+- `x86_64/amd64` → install `wgm-linux-x64`
+- `aarch64/arm64` → install `wgm-linux-arm64`
+
+Jika perlu paksa asset tertentu:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alpian9890/wireguard-vps-tunnel/main/scripts/install-wgm.sh | WGM_ASSET_NAME=wgm-linux-arm64 bash
+```
+
 ---
 
 ## 4. Alur Pertama Kali (Wajib)
