@@ -67,17 +67,8 @@ async function askYesNo(screen: blessed.Widgets.Screen, question: string): Promi
   });
 }
 
-function buildCommandInvocation(args: string[]): { command: string; commandArgs: string[] } {
-  const isPkg = Boolean((process as NodeJS.Process & { pkg?: unknown }).pkg);
-
-  if (isPkg) {
-    return { command: 'wgm', commandArgs: args };
-  }
-
-  return {
-    command: process.execPath,
-    commandArgs: [process.argv[1], ...args],
-  };
+function shellEscape(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 async function runWgmCommand(
@@ -85,36 +76,59 @@ async function runWgmCommand(
   log: blessed.Widgets.Log,
   args: string[],
 ): Promise<number> {
-  const { command, commandArgs } = buildCommandInvocation(args);
+  const commandLine = [
+    'env',
+    '-u',
+    'PKG_INVOKE_NODEJS',
+    '-u',
+    'PKG_EXECPATH',
+    '-u',
+    'PKG_PARENT_PID',
+    'wgm',
+    ...args,
+  ]
+    .map(shellEscape)
+    .join(' ');
   appendLog(log, `$ wgm ${args.join(' ')}`);
 
+  const childEnv: NodeJS.ProcessEnv = { ...process.env };
+  for (const envKey of Object.keys(childEnv)) {
+    if (envKey.startsWith('PKG_')) {
+      delete childEnv[envKey];
+    }
+  }
+
   return new Promise((resolve) => {
-    const child = spawn(command, commandArgs, {
-      env: process.env,
+    const child = spawn('bash', ['-lc', commandLine], {
+      env: childEnv,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+
+    if (child.stdout) {
+      child.stdout.on('data', (chunk: Buffer) => {
+        const text = chunk.toString().trimEnd();
+        if (text) {
+          for (const line of text.split('\n')) {
+            appendLog(log, line);
+          }
+        }
+      });
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', (chunk: Buffer) => {
+        const text = chunk.toString().trimEnd();
+        if (text) {
+          for (const line of text.split('\n')) {
+            appendLog(log, line);
+          }
+        }
+      });
+    }
 
     child.on('error', (error: Error) => {
       appendLog(log, `ERROR spawn: ${error.message}`);
       resolve(1);
-    });
-
-    child.stdout.on('data', (chunk: Buffer) => {
-      const text = chunk.toString().trimEnd();
-      if (text) {
-        for (const line of text.split('\n')) {
-          appendLog(log, line);
-        }
-      }
-    });
-
-    child.stderr.on('data', (chunk: Buffer) => {
-      const text = chunk.toString().trimEnd();
-      if (text) {
-        for (const line of text.split('\n')) {
-          appendLog(log, line);
-        }
-      }
     });
 
     child.on('close', (code) => {
