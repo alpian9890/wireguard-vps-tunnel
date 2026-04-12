@@ -1,6 +1,6 @@
 {
   "name": "wireguard-vps-tunnel",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "WireGuard Manager CLI/TUI for multi-VPS host-client operations",
   "type": "commonjs",
   "main": "dist/index.js",

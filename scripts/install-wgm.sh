@@ -5,6 +5,7 @@ REPO="${WGM_REPO:-alpian9890/wireguard-vps-tunnel}"
 VERSION="${WGM_VERSION:-latest}"
 ASSET_NAME="${WGM_ASSET_NAME:-}"
 INSTALL_PATH="${WGM_INSTALL_PATH:-/usr/bin/wgm}"
+LEGACY_PATH="/usr/local/bin/wgm"
 TMP_DIR="$(mktemp -d)"
 
 cleanup() {
@@ -103,6 +104,16 @@ else
   need_cmd sudo
   info "     Memerlukan sudo untuk menulis ke $(dirname "$INSTALL_PATH")"
   sudo mv "$TMP_DIR/wgm" "$INSTALL_PATH"
+fi
+
+if [[ "$INSTALL_PATH" != "$LEGACY_PATH" && -d "$(dirname "$LEGACY_PATH")" ]]; then
+  if [[ -w "$(dirname "$LEGACY_PATH")" ]]; then
+    ln -sfn "$INSTALL_PATH" "$LEGACY_PATH"
+  else
+    need_cmd sudo
+    sudo ln -sfn "$INSTALL_PATH" "$LEGACY_PATH"
+  fi
+  info "     Sinkronkan path lama: $LEGACY_PATH -> $INSTALL_PATH"
 fi
 
 info "5/5 Install selesai: $INSTALL_PATH"

@@ -171,6 +171,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-11 | Packaging multi-arsitektur ditambahkan: release binary untuk `linux-x64` dan `linux-arm64`; installer auto-detect arsitektur + tampilan progress download dirombak agar lebih informatif. |
 | 2026-04-11 | Revisi UX konfirmasi TUI: dialog OK/Cancel sekarang punya highlight selection dan navigasi Arrow kiri/kanan + Enter (ESC = cancel). Tambah fitur `peer add-windows` di CLI/TUI untuk generate config WireGuard client Windows siap salin. |
 | 2026-04-12 | Revisi manajemen peer Windows: `peer add-windows` kini menyimpan arsip config ke `/etc/wgm/windows-peers.json`, dukung `--copy` clipboard, tambah command `peer windows list/show/copy`, perbaiki `peer list` agar menampilkan owner/key/IP/endpoint/transfer lebih jelas. |
+| 2026-04-12 | Standarisasi path instalasi: binary utama dipasang ke `/usr/bin/wgm` dan installer otomatis sinkronkan `/usr/local/bin/wgm` sebagai symlink kompatibilitas agar command `wgm` tidak tertinggal versi lama di PATH. |
 
 ---
 

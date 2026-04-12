@@ -58,6 +58,10 @@ Installer akan auto-detect arsitektur:
 - `x86_64/amd64` → install `wgm-linux-x64`
 - `aarch64/arm64` → install `wgm-linux-arm64`
 
+Lokasi binary default:
+- utama: `/usr/bin/wgm`
+- kompatibilitas path lama: `/usr/local/bin/wgm` (symlink ke `/usr/bin/wgm`)
+
 Jika perlu paksa asset tertentu:
 
 ```bash

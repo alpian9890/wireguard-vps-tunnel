@@ -226,6 +226,7 @@ Installer otomatis mendeteksi arsitektur Linux:
 
 Default lokasi install binary:
 - `/usr/bin/wgm`
+- kompatibilitas path lama: `/usr/local/bin/wgm` (symlink)
 
 Default data aplikasi:
 - `/etc/wgm/servers.json` (inventory)

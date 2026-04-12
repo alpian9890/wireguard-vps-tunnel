@@ -15,6 +15,8 @@ interface UninstallOptions {
   binaryPath?: string;
 }
 
+const LEGACY_BINARY_PATH = '/usr/local/bin/wgm';
+
 function resolveBinaryPath(explicitPath?: string): string {
   if (explicitPath) return explicitPath;
 
@@ -71,6 +73,26 @@ async function removeBinary(binaryPath: string, noSudo: boolean): Promise<void> 
   }
 }
 
+async function removeOptionalBinary(binaryPath: string, noSudo: boolean): Promise<boolean> {
+  try {
+    await fs.unlink(binaryPath);
+    return true;
+  } catch (error: unknown) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') {
+      return false;
+    }
+    if ((code === 'EACCES' || code === 'EPERM') && !noSudo) {
+      const result = spawnSync('sudo', ['rm', '-f', binaryPath], { stdio: 'inherit' });
+      if (result.status !== 0) {
+        throw new AppError(`Gagal menghapus binary optional via sudo: ${binaryPath}`);
+      }
+      return true;
+    }
+    throw new AppError(`Gagal menghapus binary optional ${binaryPath}: ${(error as Error).message}`);
+  }
+}
+
 export function registerUninstallCommand(program: Command): void {
   program
     .command('uninstall')
@@ -92,6 +114,12 @@ export function registerUninstallCommand(program: Command): void {
       }
 
       await removeBinary(binaryPath, Boolean(options.noSudo));
+      if (binaryPath !== LEGACY_BINARY_PATH) {
+        const removedLegacy = await removeOptionalBinary(LEGACY_BINARY_PATH, Boolean(options.noSudo));
+        if (removedLegacy) {
+          console.log(`Binary lama juga dihapus: ${LEGACY_BINARY_PATH}`);
+        }
+      }
 
       if (purgeConfig) {
         await fs.rm(DEFAULT_CONFIG_DIR, { recursive: true, force: true });
