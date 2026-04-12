@@ -205,12 +205,12 @@ Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
 - Struktur command `wgm <area> <action>`
 - Inventory multi-server (`inventory init|list|add|remove|show`)
 - Operasi tunnel (`tunnel status|up|down|restart`)
-- Operasi peer live (`peer list|add|remove`)
+- Operasi peer live (`peer list|add|remove`) + generator config peer Windows (`peer add-windows`)
 - Diagnostik cepat (`doctor quick`)
 - Setup host + buat client profile (`host init`)
 - Setup client + konek otomatis ke host (`client init`)
 - Uninstall CLI (`wgm uninstall`)
-- TUI operasional untuk inventory/host/client/tunnel/peer/doctor/uninstall (`wgm tui`)
+- TUI operasional untuk inventory/host/client/tunnel/peer/doctor/uninstall + peer Windows config (`wgm tui`)
 
 Detail roadmap + checklist tim ada di:
 **[docs/08-cli-app-context-progress.md](docs/08-cli-app-context-progress.md)**

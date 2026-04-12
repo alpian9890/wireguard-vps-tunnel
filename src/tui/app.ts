@@ -44,26 +44,125 @@ async function askInput(
 }
 
 async function askYesNo(screen: blessed.Widgets.Screen, question: string): Promise<boolean> {
-  const dialog = blessed.question({
+  const dialog = blessed.box({
     parent: screen,
     border: 'line',
-    height: 9,
+    height: 11,
     width: '70%',
     top: 'center',
     left: 'center',
     label: ' Konfirmasi ',
-    tags: true,
+    tags: false,
     keys: true,
     vi: true,
-    hidden: true,
+    mouse: true,
+    style: {
+      border: { fg: 'yellow' },
+      bg: 'black',
+    },
+  });
+  const text = blessed.box({
+    parent: dialog,
+    top: 1,
+    left: 2,
+    width: '100%-4',
+    height: 4,
+    content: question,
+    tags: false,
+    style: {
+      fg: 'white',
+      bg: 'black',
+    },
+  });
+  const hint = blessed.box({
+    parent: dialog,
+    bottom: 3,
+    left: 'center',
+    width: 34,
+    height: 1,
+    content: 'Arrow kiri/kanan: pilih | Enter: OK',
+    style: {
+      fg: 'gray',
+      bg: 'black',
+    },
+  });
+  const okButton = blessed.box({
+    parent: dialog,
+    bottom: 1,
+    left: 'center',
+    width: 10,
+    height: 1,
+    content: '  OK  ',
+    align: 'center',
+    mouse: true,
+    tags: false,
+  });
+  const cancelButton = blessed.box({
+    parent: dialog,
+    bottom: 1,
+    left: 'center+12',
+    width: 12,
+    height: 1,
+    content: ' Cancel ',
+    align: 'center',
+    mouse: true,
+    tags: false,
   });
 
   return new Promise((resolve) => {
-    dialog.ask(question, (answer) => {
+    let selectedIndex = 0;
+    let settled = false;
+    const handledKeys = ['left', 'right', 'up', 'down', 'tab', 'S-tab', 'h', 'l', 'enter', 'escape'];
+    const refreshSelection = (): void => {
+      const selectedStyle = {
+        fg: 'black',
+        bg: 'green',
+      };
+      const idleStyle = {
+        fg: 'white',
+        bg: 'black',
+      };
+      okButton.style = selectedIndex === 0 ? selectedStyle : idleStyle;
+      cancelButton.style = selectedIndex === 1 ? selectedStyle : idleStyle;
+      text.setContent(question);
+      hint.setContent('Arrow kiri/kanan: pilih | Enter: pilih');
+      screen.render();
+    };
+    const finalize = (answer: boolean): void => {
+      if (settled) return;
+      settled = true;
+      for (const keyName of handledKeys) {
+        screen.unkey(keyName, keyHandler);
+      }
       dialog.destroy();
       screen.render();
-      resolve(Boolean(answer));
-    });
+      resolve(answer);
+    };
+    const keyHandler = (_ch: string, key: blessed.Widgets.Events.IKeyEventArg): void => {
+      if (key.name === 'left' || key.name === 'up' || key.name === 'h' || key.name === 'S-tab') {
+        selectedIndex = 0;
+        refreshSelection();
+        return;
+      }
+      if (key.name === 'right' || key.name === 'down' || key.name === 'l' || key.name === 'tab') {
+        selectedIndex = 1;
+        refreshSelection();
+        return;
+      }
+      if (key.name === 'enter') {
+        finalize(selectedIndex === 0);
+        return;
+      }
+      if (key.name === 'escape') {
+        finalize(false);
+      }
+    };
+
+    okButton.on('click', () => finalize(true));
+    cancelButton.on('click', () => finalize(false));
+    screen.key(handledKeys, keyHandler);
+    dialog.focus();
+    refreshSelection();
   });
 }
 
@@ -204,6 +303,7 @@ export async function startTui(): Promise<void> {
       'Tunnel: Restart',
       'Peer: List',
       'Peer: Add',
+      'Peer: Add Windows Config',
       'Peer: Remove',
       'Doctor: Quick',
       'Uninstall WGM',
@@ -436,6 +536,51 @@ export async function startTui(): Promise<void> {
         case 12: {
           const target = await askInput(screen, 'Target host (--target):');
           if (!target) break;
+          const clientName = await askInput(screen, 'Nama client Windows (--client-name):', 'win-client-01');
+          if (!clientName) break;
+          const clientIp = await askInput(screen, 'IP client tunnel (--client-ip):', '10.0.0.4/32');
+          if (!clientIp) break;
+          const endpoint = await askInput(screen, 'Endpoint host (opsional --endpoint):');
+          const listenPort = await askInput(screen, 'Listen port host (--listen-port):', '51820');
+          if (!listenPort) break;
+          const dns = await askInput(screen, 'DNS client windows (--dns):', '1.1.1.1');
+          if (!dns) break;
+          const allowedIps = await askInput(
+            screen,
+            'Allowed IPs client windows (--allowed-ips):',
+            '0.0.0.0/0, ::/0',
+          );
+          if (!allowedIps) break;
+          const keepalive = await askInput(screen, 'PersistentKeepalive (--keepalive):', '25');
+          if (!keepalive) break;
+          const iface = await askInput(screen, 'Interface host opsional (--iface):');
+
+          const args = [
+            'peer',
+            'add-windows',
+            '--target',
+            target.trim(),
+            '--client-name',
+            clientName.trim(),
+            '--client-ip',
+            clientIp.trim(),
+            '--listen-port',
+            listenPort.trim(),
+            '--dns',
+            dns.trim(),
+            '--allowed-ips',
+            allowedIps.trim(),
+            '--keepalive',
+            keepalive.trim(),
+          ];
+          pushOption(args, '--endpoint', endpoint);
+          pushOption(args, '--iface', iface);
+          await runWgmCommand(screen, log, args);
+          break;
+        }
+        case 13: {
+          const target = await askInput(screen, 'Target host (--target):');
+          if (!target) break;
           const pubKey = await askInput(screen, 'Public key peer (--public-key):');
           if (!pubKey) break;
           const iface = await askInput(screen, 'Interface opsional (--iface):');
@@ -444,7 +589,7 @@ export async function startTui(): Promise<void> {
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 13: {
+        case 14: {
           const target = await askInput(screen, 'Target server (--target):');
           if (!target) break;
           const iface = await askInput(screen, 'Interface opsional (--iface):');
@@ -453,7 +598,7 @@ export async function startTui(): Promise<void> {
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 14: {
+        case 15: {
           const confirm = await askYesNo(screen, 'Yakin uninstall wgm dari mesin ini?');
           if (!confirm) break;
           const purge = await askYesNo(screen, 'Hapus juga config ~/.wg-manager?');
@@ -462,11 +607,12 @@ export async function startTui(): Promise<void> {
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 15: {
+        case 16: {
           appendLog(log, 'Contoh command:');
           appendLog(log, 'wgm inventory add --name node11 --role host --host 1.2.3.4 --auth key --key-path /root/.ssh/id_rsa');
           appendLog(log, 'wgm host init --target node11 --endpoint 1.2.3.4');
           appendLog(log, 'wgm client init --target node7 --host-target node11 --client-ip 10.0.0.2/32');
+          appendLog(log, 'wgm peer add-windows --target node11 --client-name win-client-01 --client-ip 10.0.0.4/32');
           appendLog(log, 'wgm tunnel status --target node11');
           appendLog(log, 'wgm doctor quick --target node7');
           break;

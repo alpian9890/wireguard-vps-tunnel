@@ -203,6 +203,36 @@ wgm peer add \
 
 Lalu pastikan config client di VPS tersebut sudah benar dan tunnel dinyalakan.
 
+### Cara C (client Windows tanpa SSH): `peer add-windows`
+
+Jika client adalah **Windows** (tidak bisa di-SSH), buat peer langsung di host lalu ambil output config siap impor:
+
+```bash
+wgm peer add-windows \
+  --target vps-a-host \
+  --client-name win-client-01 \
+  --client-ip 10.0.0.4/32 \
+  --endpoint 203.0.113.10 \
+  --listen-port 51820 \
+  --dns 1.1.1.1 \
+  --allowed-ips "0.0.0.0/0, ::/0"
+```
+
+Output command ini adalah blok config WireGuard client Windows:
+
+```ini
+[Interface]
+PrivateKey = <CLIENT_PRIVATE_KEY>
+Address = 10.0.0.4/32
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = <HOST_PUBLIC_KEY>
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = 203.0.113.10:51820
+PersistentKeepalive = 25
+```
+
 ---
 
 ## 8. Menghapus Client dari Host
@@ -261,6 +291,7 @@ Kontrol:
 - Arrow Up/Down: pindah menu
 - Enter: pilih menu
 - Esc / q: keluar
+- Di dialog konfirmasi, gunakan Arrow Left/Right untuk pilih **OK/Cancel** (dengan highlight warna), lalu Enter untuk eksekusi.
 
 Menu penting yang tersedia:
 - `Inventory: Init`
@@ -269,6 +300,7 @@ Menu penting yang tersedia:
 - `Client: Init (Connect to Host)`
 - `Tunnel: Status/Up/Down/Restart`
 - `Peer: List/Add/Remove`
+- `Peer: Add Windows Config`
 - `Doctor: Quick`
 - `Uninstall WGM`
 

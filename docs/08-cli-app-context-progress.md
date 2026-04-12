@@ -69,7 +69,7 @@ Area dan action awal:
 
 - `inventory init|path|list|show|add|remove`
 - `tunnel status|up|down|restart`
-- `peer list|add|remove`
+- `peer list|add|remove|add-windows`
 - `doctor quick`
 - `host init` (setup host + optional create client profile)
 - `client init` (setup client + auto connect ke host)
@@ -125,6 +125,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 - [x] Implement `host init`
 - [x] Implement `client init`
 - [x] Implement `peer add`
+- [x] Implement `peer add-windows` (generate config siap pakai untuk WireGuard Windows)
 - [x] Implement `peer remove`
 - [x] Implement `peer list`
 - [x] Implement `tunnel up|down|restart|status`
@@ -168,6 +169,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Fix eksekusi command dari TUI pada binary `pkg`: TUI mengeksekusi `env -u PKG_* wgm ...` via `bash -lc` agar child process tidak masuk mode node-invoke; menu `Inventory`/`Uninstall` berjalan normal. |
 | 2026-04-10 | Hotfix TUI: perbaiki error `Cannot find module '/root/inventory'` saat pilih menu `Inventory Init/List` dengan menormalkan eksekusi subprocess pada binary release. |
 | 2026-04-11 | Packaging multi-arsitektur ditambahkan: release binary untuk `linux-x64` dan `linux-arm64`; installer auto-detect arsitektur + tampilan progress download dirombak agar lebih informatif. |
+| 2026-04-11 | Revisi UX konfirmasi TUI: dialog OK/Cancel sekarang punya highlight selection dan navigasi Arrow kiri/kanan + Enter (ESC = cancel). Tambah fitur `peer add-windows` di CLI/TUI untuk generate config WireGuard client Windows siap salin. |
 
 ---
 
