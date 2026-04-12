@@ -304,6 +304,7 @@ export async function startTui(): Promise<void> {
       'Peer: List',
       'Peer: Add',
       'Peer: Add Windows Config',
+      'Peer: Windows List/Show',
       'Peer: Remove',
       'Doctor: Quick',
       'Uninstall WGM',
@@ -554,6 +555,7 @@ export async function startTui(): Promise<void> {
           const keepalive = await askInput(screen, 'PersistentKeepalive (--keepalive):', '25');
           if (!keepalive) break;
           const iface = await askInput(screen, 'Interface host opsional (--iface):');
+          const copyConfig = await askYesNo(screen, 'Copy config hasil generate ke clipboard lokal?');
 
           const args = [
             'peer',
@@ -575,10 +577,27 @@ export async function startTui(): Promise<void> {
           ];
           pushOption(args, '--endpoint', endpoint);
           pushOption(args, '--iface', iface);
+          if (copyConfig) args.push('--copy');
           await runWgmCommand(screen, log, args);
           break;
         }
         case 13: {
+          const target = await askInput(screen, 'Filter target host opsional (--target):');
+          const listArgs = ['peer', 'windows', 'list'];
+          pushOption(listArgs, '--target', target);
+          await runWgmCommand(screen, log, listArgs);
+
+          const showDetail = await askYesNo(screen, 'Tampilkan detail config salah satu peer Windows?');
+          if (!showDetail) break;
+          const recordId = await askInput(screen, 'ID peer windows (--id):');
+          if (!recordId) break;
+          const copy = await askYesNo(screen, 'Copy config peer ini ke clipboard lokal?');
+          const showArgs = ['peer', 'windows', 'show', '--id', recordId.trim()];
+          if (copy) showArgs.push('--copy');
+          await runWgmCommand(screen, log, showArgs);
+          break;
+        }
+        case 14: {
           const target = await askInput(screen, 'Target host (--target):');
           if (!target) break;
           const pubKey = await askInput(screen, 'Public key peer (--public-key):');
@@ -589,7 +608,7 @@ export async function startTui(): Promise<void> {
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 14: {
+        case 15: {
           const target = await askInput(screen, 'Target server (--target):');
           if (!target) break;
           const iface = await askInput(screen, 'Interface opsional (--iface):');
@@ -598,21 +617,23 @@ export async function startTui(): Promise<void> {
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 15: {
+        case 16: {
           const confirm = await askYesNo(screen, 'Yakin uninstall wgm dari mesin ini?');
           if (!confirm) break;
-          const purge = await askYesNo(screen, 'Hapus juga config ~/.wg-manager?');
+          const purge = await askYesNo(screen, 'Hapus juga config /etc/wgm?');
           const args = ['uninstall', '--yes'];
           if (purge) args.push('--purge-config');
           await runWgmCommand(screen, log, args);
           break;
         }
-        case 16: {
+        case 17: {
           appendLog(log, 'Contoh command:');
           appendLog(log, 'wgm inventory add --name node11 --role host --host 1.2.3.4 --auth key --key-path /root/.ssh/id_rsa');
           appendLog(log, 'wgm host init --target node11 --endpoint 1.2.3.4');
           appendLog(log, 'wgm client init --target node7 --host-target node11 --client-ip 10.0.0.2/32');
-          appendLog(log, 'wgm peer add-windows --target node11 --client-name win-client-01 --client-ip 10.0.0.4/32');
+          appendLog(log, 'wgm peer add-windows --target node11 --client-name win-client-01 --client-ip 10.0.0.4/32 --copy');
+          appendLog(log, 'wgm peer windows list --target node11');
+          appendLog(log, 'wgm peer windows show --id node11__win-client-01 --copy');
           appendLog(log, 'wgm tunnel status --target node11');
           appendLog(log, 'wgm doctor quick --target node7');
           break;

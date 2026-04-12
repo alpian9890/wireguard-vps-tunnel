@@ -69,7 +69,7 @@ Area dan action awal:
 
 - `inventory init|path|list|show|add|remove`
 - `tunnel status|up|down|restart`
-- `peer list|add|remove|add-windows`
+- `peer list|add|remove|add-windows|windows list|windows show|windows copy`
 - `doctor quick`
 - `host init` (setup host + optional create client profile)
 - `client init` (setup client + auto connect ke host)
@@ -85,7 +85,7 @@ Area dan action awal:
   - CLI command mode (non-interactive, cocok automation/script)
   - TUI mode (interactive, navigasi arrow/enter/esc)
 - Distribusi: build ke single binary via **pkg**
-- Konfigurasi lokal aplikasi: file inventory terpusat (mis. `~/.wg-manager/servers.json`)
+- Konfigurasi lokal aplikasi: file inventory terpusat (`/etc/wgm/servers.json`) + arsip peer Windows (`/etc/wgm/windows-peers.json`)
 - Eksekusi remote: SSH untuk menjalankan command pada VPS target
 
 ---
@@ -170,6 +170,7 @@ Gunakan checklist berikut sebagai progress utama tim.
 | 2026-04-10 | Hotfix TUI: perbaiki error `Cannot find module '/root/inventory'` saat pilih menu `Inventory Init/List` dengan menormalkan eksekusi subprocess pada binary release. |
 | 2026-04-11 | Packaging multi-arsitektur ditambahkan: release binary untuk `linux-x64` dan `linux-arm64`; installer auto-detect arsitektur + tampilan progress download dirombak agar lebih informatif. |
 | 2026-04-11 | Revisi UX konfirmasi TUI: dialog OK/Cancel sekarang punya highlight selection dan navigasi Arrow kiri/kanan + Enter (ESC = cancel). Tambah fitur `peer add-windows` di CLI/TUI untuk generate config WireGuard client Windows siap salin. |
+| 2026-04-12 | Revisi manajemen peer Windows: `peer add-windows` kini menyimpan arsip config ke `/etc/wgm/windows-peers.json`, dukung `--copy` clipboard, tambah command `peer windows list/show/copy`, perbaiki `peer list` agar menampilkan owner/key/IP/endpoint/transfer lebih jelas. |
 
 ---
 

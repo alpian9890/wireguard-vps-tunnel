@@ -22,7 +22,7 @@ function resolveBinaryPath(explicitPath?: string): string {
     return process.execPath;
   }
 
-  return '/usr/local/bin/wgm';
+  return '/usr/bin/wgm';
 }
 
 async function confirmUninstall(options: { binaryPath: string; purgeConfig: boolean }): Promise<boolean> {
@@ -32,7 +32,7 @@ async function confirmUninstall(options: { binaryPath: string; purgeConfig: bool
 
   console.log('Konfirmasi uninstall WGM');
   console.log(`- Hapus binary: ${options.binaryPath}`);
-  console.log(`- Hapus config (~/.wg-manager): ${options.purgeConfig ? 'YA' : 'TIDAK'}`);
+  console.log(`- Hapus config (${DEFAULT_CONFIG_DIR}): ${options.purgeConfig ? 'YA' : 'TIDAK'}`);
   console.log('');
 
   const rl = readline.createInterface({
@@ -76,7 +76,7 @@ export function registerUninstallCommand(program: Command): void {
     .command('uninstall')
     .description('Uninstall aplikasi wgm dari mesin ini')
     .option('--yes', 'Lewati konfirmasi interaktif')
-    .option('--purge-config', 'Hapus juga ~/.wg-manager')
+    .option('--purge-config', `Hapus juga ${DEFAULT_CONFIG_DIR}`)
     .option('--no-sudo', 'Jangan gunakan sudo fallback saat hapus binary')
     .option('--binary-path <path>', 'Override path binary wgm yang dihapus')
     .action(async (options: UninstallOptions) => {

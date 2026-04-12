@@ -4,7 +4,7 @@ set -euo pipefail
 REPO="${WGM_REPO:-alpian9890/wireguard-vps-tunnel}"
 VERSION="${WGM_VERSION:-latest}"
 ASSET_NAME="${WGM_ASSET_NAME:-}"
-INSTALL_PATH="${WGM_INSTALL_PATH:-/usr/local/bin/wgm}"
+INSTALL_PATH="${WGM_INSTALL_PATH:-/usr/bin/wgm}"
 TMP_DIR="$(mktemp -d)"
 
 cleanup() {

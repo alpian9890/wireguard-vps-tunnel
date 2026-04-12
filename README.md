@@ -205,12 +205,13 @@ Fondasi aplikasi `wgm` (WireGuard Manager) sudah dimulai:
 - Struktur command `wgm <area> <action>`
 - Inventory multi-server (`inventory init|list|add|remove|show`)
 - Operasi tunnel (`tunnel status|up|down|restart`)
-- Operasi peer live (`peer list|add|remove`) + generator config peer Windows (`peer add-windows`)
+- Operasi peer live (`peer list|add|remove`) + generator config peer Windows (`peer add-windows --copy`)
+- Arsip peer Windows lokal (`peer windows list|show|copy`)
 - Diagnostik cepat (`doctor quick`)
 - Setup host + buat client profile (`host init`)
 - Setup client + konek otomatis ke host (`client init`)
 - Uninstall CLI (`wgm uninstall`)
-- TUI operasional untuk inventory/host/client/tunnel/peer/doctor/uninstall + peer Windows config (`wgm tui`)
+- TUI operasional untuk inventory/host/client/tunnel/peer/doctor/uninstall + peer Windows config/list (`wgm tui`)
 
 Detail roadmap + checklist tim ada di:
 **[docs/08-cli-app-context-progress.md](docs/08-cli-app-context-progress.md)**
@@ -222,6 +223,13 @@ Detail roadmap + checklist tim ada di:
 Installer otomatis mendeteksi arsitektur Linux:
 - `x86_64/amd64` → `wgm-linux-x64`
 - `aarch64/arm64` → `wgm-linux-arm64`
+
+Default lokasi install binary:
+- `/usr/bin/wgm`
+
+Default data aplikasi:
+- `/etc/wgm/servers.json` (inventory)
+- `/etc/wgm/windows-peers.json` (arsip config peer Windows)
 
 Install 1 baris via **curl**:
 

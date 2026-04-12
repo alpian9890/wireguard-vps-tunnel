@@ -79,7 +79,13 @@ Inventory default tersimpan di:
 
 ```bash
 wgm inventory path
-# biasanya: /root/.wg-manager/servers.json
+# default: /etc/wgm/servers.json
+```
+
+Arsip peer Windows disimpan di:
+
+```bash
+/etc/wgm/windows-peers.json
 ```
 
 ---
@@ -215,10 +221,15 @@ wgm peer add-windows \
   --endpoint 203.0.113.10 \
   --listen-port 51820 \
   --dns 1.1.1.1 \
-  --allowed-ips "0.0.0.0/0, ::/0"
+  --allowed-ips "0.0.0.0/0, ::/0" \
+  --copy
 ```
 
-Output command ini adalah blok config WireGuard client Windows:
+Output command ini adalah blok config WireGuard client Windows, sekaligus:
+- tersimpan ke arsip lokal `/etc/wgm/windows-peers.json`
+- tersalin ke clipboard lokal jika pakai `--copy`
+
+Output config:
 
 ```ini
 [Interface]
@@ -231,6 +242,24 @@ PublicKey = <HOST_PUBLIC_KEY>
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = 203.0.113.10:51820
 PersistentKeepalive = 25
+```
+
+Lihat daftar arsip peer Windows:
+
+```bash
+wgm peer windows list
+```
+
+Lihat detail config peer Windows tertentu:
+
+```bash
+wgm peer windows show --id <ID_RECORD>
+```
+
+Tampilkan + copy ke clipboard:
+
+```bash
+wgm peer windows show --id <ID_RECORD> --copy
 ```
 
 ---
@@ -301,6 +330,7 @@ Menu penting yang tersedia:
 - `Tunnel: Status/Up/Down/Restart`
 - `Peer: List/Add/Remove`
 - `Peer: Add Windows Config`
+- `Peer: Windows List/Show`
 - `Doctor: Quick`
 - `Uninstall WGM`
 
@@ -338,6 +368,7 @@ wgm inventory list
 wgm tunnel status --target <name>
 wgm doctor quick --target <name>
 wgm peer list --target <host-name>
+wgm peer windows list
 ```
 
 ---
